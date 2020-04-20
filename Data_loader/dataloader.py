@@ -4,9 +4,8 @@ import torch
 from torch.utils.data import Dataset
 import nltk
 
-
 class TextCorpus(Dataset):
-    def __init__(self, path='Corpus/The_Tempest.txt'):
+    def __init__(self, path='Corpus/shakespeare.txt'):
         # choose device where the data will reside
         self.device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
@@ -16,9 +15,10 @@ class TextCorpus(Dataset):
 
         # tokenize the text
         self.word_token = nltk.word_tokenize(self.data.lower())
+        # self.character_token = list(self.data)
 
         # generate the vocabulary
-        self.vocab = set(self.word_token)
+        self.vocab = sorted(set(self.word_token))
         self.num_vocab = len(self.vocab)
 
         # generate a mapping from words to indices in a dictionary (and vice-versa)

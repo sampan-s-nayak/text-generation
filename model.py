@@ -3,8 +3,15 @@ import torch.nn as nn
 import torch.nn.functional as F
 from torch.utils.data import DataLoader
 import numpy as np
+import os
 from Data_loader import dataloader as dl
 from Settings import settings as default
+import nltk
+
+# seed = 0
+# torch.manual_seed(seed)
+# if torch.cuda.is_available():
+#     torch.cuda.manual_seed_all(seed)
 
 corpus = dl.TextCorpus()
 
@@ -25,18 +32,18 @@ class TextGenerator(nn.Module):
 
     def zero_state(self, batch_size):
         #returns initial LSTM stage
-        return (torch.zeros(1, batch_size, self.hidden_dim),
-                torch.zeros(1, batch_size, self.hidden_dim))
+        return (torch.zeros(1, batch_size, self.hidden_dim).to(corpus.device),
+                torch.zeros(1, batch_size, self.hidden_dim).to(corpus.device))
 
 def get_loss_and_optimizer(model,learning_rate=default.LEARNING_RATE):
     loss_fn = nn.CrossEntropyLoss()
     optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
     return loss_fn, optimizer
 
-def train(model,epoch):
+def train(model,epoch,init_trained=0):
     loss_fn,optimizer = get_loss_and_optimizer(model)
-    dataloader = DataLoader(corpus, batch_size=default.BATCH_SIZE, num_workers=4,shuffle=False)
-    for i in range(epoch):
+    dataloader = DataLoader(corpus, batch_size=default.BATCH_SIZE,shuffle=False)
+    for i in range(epoch - init_trained):
         model.train()
         epoch_loss = 0
         for j,data in enumerate(dataloader):
@@ -54,7 +61,7 @@ def train(model,epoch):
             state_h = state_h.detach()
             state_c = state_c.detach()
 
-            loss_value = loss.item()
+            loss_value = loss.detach().item()
 
             # Perform back-propagation
             loss.backward()
@@ -67,31 +74,39 @@ def train(model,epoch):
             optimizer.step()
 
             epoch_loss += loss_value
-        print(f"epoch: {i+1} loss: {loss}")
+        print(f"epoch: {i+1+init_trained} loss: {loss}")
+        save_model(model,path=os.path.join(default.WEIGHTS_PATH,f"bootstrap_epoch({i+1+init_trained})_loss({loss}).pth"))
+    return model
 
-def save_model(model,path=default.WEIGHTS_PATH):
+def save_model(model,path=os.path.join(default.WEIGHTS_PATH,"checkpoint1.pth")):
     torch.save(model.state_dict(), path)
 
-def load_model(path=default.WEIGHTS_PATH):
+def load_model(path=os.path.join(default.WEIGHTS_PATH,"checkpoint1.pth")):
     model = TextGenerator(default.EMBEDDING_DIM,default.HIDDEN_LAYER_DIM,default.VOCAB_SIZE)
-    model.load_state_dict(torch.load(path))
+    model.load_state_dict(torch.load(path,map_location=torch.device(corpus.device)))
     model.eval()
     return model
 
 def generate_text(model,initial_text,length):
     # initial LSTM stage
-    state_h, state_c = model.zero_state(default.BATCH_SIZE)
-    print(initial_text,end=" ")
-    pred, (state_h, state_c) = model(torch.tensor([corpus.word_to_ix[initial_text]]).view(1,-1), (state_h, state_c))
+    model.eval()
+    state_h, state_c = model.zero_state(default.DEPLOY_BATCH_SIZE)
+    tokens = nltk.word_tokenize(initial_text)
+    for token in tokens:
+        print(token,end=" ")
+        pred, (state_h, state_c) = model(torch.tensor([corpus.word_to_ix[token.lower()]],device=corpus.device).view(1,-1), (state_h, state_c))
     for i in range(length):
-        prev = np.argmax(pred.detach().view(1,-1))
-        ind = prev.numpy().item()
+        _, top_ix = torch.topk(pred[0], k=10)
+        choices = top_ix.tolist()
+        ind = np.random.choice(choices[0])
         print(corpus.ix_to_word[ind],end=" ")
-        pred, (state_h, state_c) = model(torch.tensor([prev]).view(1,-1), (state_h, state_c))
+        pred, (state_h, state_c) = model(torch.tensor([ind],device=corpus.device).view(1,-1), (state_h, state_c))
 
 if __name__=="__main__":
     # model = TextGenerator(default.EMBEDDING_DIM,default.HIDDEN_LAYER_DIM,default.VOCAB_SIZE)
-    # train(model,10)
-    # save_model(model)
-    model = load_model()
-    generate_text(model,"the",30)
+    # model.to(corpus.device)
+    # model = train(model,25)
+
+    model = load_model(path=os.path.join(default.WEIGHTS_PATH,'shakespeare_epoch(25)_loss(4.941622734069824).pth'))
+    model.to(corpus.device)
+    generate_text(model,initial_text="in sooth",length=400)

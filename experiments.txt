@@ -1,0 +1,31 @@
+bootstrap training (trained for 25 epochs, generating 40 tokens(words))
+
+input 1:
+.display-1 { 
+
+output 1:
+.display-1 { 
+    color : 0 ; 
+    } } } 
+@ media ( : 0 0 ; 
+    } } } 
+@ media ( : 0 0 ; 
+    } } } 
+@ media ( : 0 0 ; 
+    } } }
+@ media ( %     
+
+input 2:
+:root { 
+    
+output 2:
+:root { 
+    color : 0 ;
+    } } }
+@ media ( : 0 0 ; 
+    } } } 
+@ media ( : 0 0 ; 
+    } } } 
+@ media ( : 0 0 ; 
+    } } } 
+@ media ( 
