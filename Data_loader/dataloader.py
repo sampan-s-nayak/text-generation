@@ -3,9 +3,10 @@ import numpy as np
 import torch
 from torch.utils.data import Dataset
 import nltk
+from Settings import dataset as ds
 
 class TextCorpus(Dataset):
-    def __init__(self, path='Corpus/shakespeare.txt'):
+    def __init__(self, path=ds.PATH):
         # choose device where the data will reside
         self.device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
@@ -15,7 +16,6 @@ class TextCorpus(Dataset):
 
         # tokenize the text
         self.word_token = nltk.word_tokenize(self.data.lower())
-        # self.character_token = list(self.data)
 
         # generate the vocabulary
         self.vocab = sorted(set(self.word_token))
@@ -27,10 +27,6 @@ class TextCorpus(Dataset):
 
 
     def __getitem__(self, idx):
-
-        # y = np.zeros((self.num_vocab),np.long)
-        # y[self.word_to_ix[self.word_token[idx+1]]] = 1
-
         x = torch.tensor([self.word_to_ix[self.word_token[idx]]],dtype=torch.long,device=self.device)
         y = torch.tensor([self.word_to_ix[self.word_token[idx+1]]],dtype=torch.long,device=self.device)
         data = {
