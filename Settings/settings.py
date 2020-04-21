@@ -2,7 +2,7 @@
     this file contains the configuration settings for the neural network
 """
 import Data_loader.dataloader as dl
-import dataset
+from Settings import dataset
 
 EMBEDDING_DIM = 50
 

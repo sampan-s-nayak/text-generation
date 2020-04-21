@@ -1,0 +1,32 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+    <title>Document</title>
+</head>
+<body>
+    <div class="container" style="margin-top: 2em;">
+        <div class="card">
+            <div class="card-body">
+                <h4 class="card-title">Enter initial text</h4>
+                <div class="form-group">
+                    <textarea id="input" class="form-control" rows="3"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="length">Enter number of words:</label>
+                    <input type="number" class="form-control" id="length" min=0 placeholder="Default: 40" value="40">
+                </div>
+                  <div class='btn btn-sm btn-primary' id='submit'>submit</div>
+            </div>
+        </div>   
+        <div class="card" style="margin-top: 1.5em;display: none;" id="output" >
+            <div class="card-body">
+                <h4 class="card-title">Generated Text:</h4>
+                <p id="output_content">Lorem ipsum dolor sit amet consectetur adipisicing elit. Tenetur atque cupiditate, ratione, ab quasi quae corporis soluta at officia id in, harum est nisi inventore recusandae provident nihil delectus architecto?</p>
+            </div>
+        </div>     
+    </div>
+    <script type="text/javascript" src="./static/index.js"></script>
+</body>
+</html>

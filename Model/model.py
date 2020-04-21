@@ -93,7 +93,7 @@ def generate_text(model,initial_text,length):
         output = output + str(token) + " "
         pred, (state_h, state_c) = model(torch.tensor([default.CORPUS.word_to_ix[token.lower()]],device=default.DEVICE).view(1,-1), (state_h, state_c))
     for i in range(length):
-        _, top_ix = torch.topk(pred[0], k=10)
+        _, top_ix = torch.topk(pred[0], k=4)
         choices = top_ix.tolist()
         ind = np.random.choice(choices[0])
         output = output + str(default.CORPUS.ix_to_word[ind]) + " "
