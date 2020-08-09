@@ -141,12 +141,13 @@ def train(model,epoch,init_trained=0):
     for i in range(epoch - init_trained):
         model.train()
         epoch_loss = 0
+        
+        # initial LSTM stage
+        state_h, state_c = model.zero_state(default.BATCH_SIZE)
+        
         for j,data in enumerate(dataloader):
             # set gradients to zero
             optimizer.zero_grad()
-
-            # initial LSTM stage
-            state_h, state_c = model.zero_state(default.BATCH_SIZE)
 
             pred, (state_h, state_c) = model(data["curr_word"], (state_h, state_c))
 
